@@ -4,7 +4,7 @@ const morgan = require('morgan');
 const bodyparser = require('body-parser');
 const path = require('path');
 const connectDB = require('./server/database/connect');
-const { errorHandler, notFound } = require('./middlewares/Errohandler');
+const { errorHandler, notFound } = require('./server/middlewares/Errohandler');
 
 const app = express();
 

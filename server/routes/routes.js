@@ -6,7 +6,7 @@ const {
     validateCard,
     validatePack,
     validatePerDay
-} = require('../../middlewares/validMiddleWare');
+} = require('../middlewares/validMiddleWare');
 const route = express.Router(); //Allows us use express router in this file
 const services = require('../services/render');//uses the render.js file from services here
 
