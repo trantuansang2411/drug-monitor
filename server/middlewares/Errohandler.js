@@ -39,7 +39,7 @@ const errorHandler = (err, req, res, next) => {
         // Return JSON for AJAX/API requests
         return res.status(error.statusCode || 500).json({
             success: false,
-            error: error.message || 'Server Error'
+            error: error.message || 'Server Errorr'
         });
     }
 
