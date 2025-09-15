@@ -1,38 +1,73 @@
 <!-- add header -->
 <%- include('includes/_header') %>
-<!-- end header -->
-<!-- Main section -->
-<main id="main">
+	<!-- end header -->
+	<!-- Main section -->
+	<main id="main">
 
-	<h2>Calculate Drugs to purchase</h2>
-	<p>For how many days do you want to purchase drugs?</p> <form id="drug_days"> <input type="number" id="days" value="30"> <button type="submit">Enter</button> </form>
+		<h2>Calculate Drugs to purchase</h2>
+		<p>For how many days do you want to purchase drugs?</p>
+		<form action="/purchase" method="POST" id="drug_days"
+			onsubmit="console.log('Form submitting with days:', document.getElementById('days').value)">
+			<input type="number" name="days" id="days" value="<%= days %>" min="1" max="365" required>
+			<button type="submit">Calculate</button>
+		</form>
 
-	<table id="purchase_table">	
-		<thead>
-			<tr>
-				<th>ID</th>
-				<th>Drug Name</th>
-				<th> Cards to Buy</th>
-				<th>Packs to Buy</th>
-			</tr>
-		</thead>
-		<tbody>
-			<!-- Loop through drugs -->
-			<% for(let i = 0; i < drugs.length; i++) {%>
-			<% let days = 30; %>
-			<% let pills = days*drugs[i].perDay; %>
-			<tr>
-				<td><%= i + 1 %></td>
-				<td><%= drugs[i].name %></td>
-				<td><%= Math.ceil(pills/drugs[i].card) %> (<%= drugs[i].pack/drugs[i].card %> <% if (drugs[i].pack/drugs[i].card < 2) { %> card <%} else { %> cards <% } %> per pack)</td>
-				<td><%= Math.ceil(pills/drugs[i].pack) %></td>
-			</tr>
-			<% } %> <!--  End loop -->
-		</tbody>
-	</table>
-</main>
-<!-- End main section -->
-<!-- add footer -->
-<%- include('includes/_footer') %>
-<!-- end footer-->
+		<table id="purchase_table">
+			<thead>
+				<tr>
+					<th>ID</th>
+					<th>Drug Name</th>
+					<th> Cards to Buy</th>
+					<th>Packs to Buy</th>
+				</tr>
+			</thead>
+			<tbody>
+				<!-- Loop through drugs -->
+				<% for(let i=0; i < drugs.length; i++) {%>
+					<% let pills=days * drugs[i].perDay; %>
+						<tr>
+							<td>
+								<%= i + 1 %>
+							</td>
+							<td>
+								<%= drugs[i].name %>
+							</td>
+							<td>
+								<%= Math.ceil(pills/drugs[i].card) %> (<%= drugs[i].pack/drugs[i].card %>
+										<% if (drugs[i].pack/drugs[i].card < 2) { %> card <%} else { %> cards <% } %>
+													per pack)
+							</td>
+							<td>
+								<%= Math.ceil(pills/drugs[i].pack) %>
+							</td>
+						</tr>
+						<% } %> <!--  End loop -->
+			</tbody>
+		</table>
+	</main>
+	<!-- End main section -->
+	<!-- add footer -->
+	<%- include('includes/_footer') %>
+		<!-- end footer-->
 
+		<script>
+			// Debug script to check form submission
+			document.addEventListener('DOMContentLoaded', function () {
+				const form = document.getElementById('drug_days');
+				const daysInput = document.getElementById('days');
+
+				console.log('Form element:', form);
+				console.log('Days input:', daysInput);
+				console.log('Current days value:', daysInput.value);
+
+				form.addEventListener('submit', function (e) {
+					console.log('=== FORM SUBMIT EVENT ===');
+					console.log('Days value being submitted:', daysInput.value);
+					console.log('Form action:', form.action);
+					console.log('Form method:', form.method);
+
+					// Let form submit normally - don't prevent default
+					// e.preventDefault();
+				});
+			});
+		</script>

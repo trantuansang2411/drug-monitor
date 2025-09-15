@@ -1,28 +1,96 @@
 const express = require('express');//we installed express using npm previously and we are indicating that it would be used here
-const app = express(); //this assigns express to the variable "app" - anything else can be used.
-const bodyParser = require('body-parser');//body-parser makes it easier to deal with request content by making it easier to use
-const dotenv = require('dotenv').config();//indicates we would be using .env
-const morgan = require('morgan');//this logs requests so you can easily troubleshoot
-const connectMongo = require('./server/database/connect');//requires connect.js file
-const PORT = process.env.PORT || 3100; //uses either what's in our env or 3100 as our port (you can use any unused port)
+const dotenv = require('dotenv');
+const morgan = require('morgan');
+const bodyparser = require('body-parser');
+const path = require('path');
+const connectDB = require('./server/database/connect');
+const { errorHandler, notFound } = require('./middlewares/Errohandler');
 
+const app = express();
 
-app.set('view engine', 'ejs');//Put before app.use, etc. Lets us use EJS for views
-//use body-parser to parse requests
-app.use(bodyParser.urlencoded({extended:true}));
-//indicates which is the folder where static files are served from
-app.use(express.static('assets'));
-//use morgan to log http requests
+dotenv.config();
+const PORT = process.env.PORT || 8080;
+
+// Global error handling for unhandled promise rejections
+process.on('unhandledRejection', (err, promise) => {
+	console.log(`Error: ${err.message}`.red);
+	// Close server & exit process
+	server.close(() => {
+		process.exit(1);
+	});
+});
+
+// Global error handling for uncaught exceptions
+process.on('uncaughtException', (err) => {
+	console.log(`Error: ${err.message}`.red);
+	console.log('Shutting down due to uncaught exception');
+	process.exit(1);
+});
+
+// Log requests
 app.use(morgan('tiny'));
 
-//connect to Database
-connectMongo(); 
+// MongoDB connection
+connectDB();
 
-//load the routes
-app.use('/',require('./server/routes/routes'));//Pulls the routes file whenever this is loaded
+// Parse request to body-parser
+app.use(bodyparser.urlencoded({ extended: true }));
+app.use(bodyparser.json()); // Add JSON parsing
 
+// Set view engine
+app.set("view engine", "ejs");
 
-app.listen(PORT, function() {//specifies port to listen on
-	console.log('listening on '+ PORT);
-	console.log(`Welcome to the Drug Monitor App at http://localhost:${PORT}`);
-})
+// Load assets
+app.use('/css', express.static(path.resolve(__dirname, "assets/css")));
+app.use('/img', express.static(path.resolve(__dirname, "assets/images")));
+app.use('/js', express.static(path.resolve(__dirname, "assets/js")));
+app.use('/images', express.static(path.resolve(__dirname, "assets/images")));
+app.use('/favicon.ico', express.static(path.resolve(__dirname, "assets/images/favicon/favicon.ico")));
+
+// Global middleware for logging all requests
+app.use((req, res, next) => {
+	console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+	console.log('Headers:', req.headers);
+	if (req.body && Object.keys(req.body).length > 0) {
+		console.log('Body:', req.body);
+	}
+	next();
+});
+
+// Global middleware for setting response headers
+app.use((req, res, next) => {
+	res.header('X-Powered-By', 'Drug Monitor App');
+	res.header('X-Frame-Options', 'DENY');
+	res.header('X-Content-Type-Options', 'nosniff');
+	next();
+});
+
+// Load routers
+app.use('/', require('./server/routes/routes'));
+
+// Global error handling middleware (must be after all routes)
+app.use(notFound);       // 404 handler - when no route matches
+app.use(errorHandler);   // General error handler
+
+// Start server
+const server = app.listen(PORT, () => {
+	console.log(`Server is running on http://localhost:${PORT}`);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+	console.log('👋 SIGTERM RECEIVED. Shutting down gracefully');
+	server.close(() => {
+		console.log('💥 Process terminated!');
+	});
+});
+
+process.on('SIGINT', () => {
+	console.log('👋 SIGINT RECEIVED. Shutting down gracefully');
+	server.close(() => {
+		console.log('💥 Process terminated!');
+		process.exit(0);
+	});
+});
+
+module.exports = app;

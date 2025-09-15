@@ -1,0 +1,26 @@
+<!-- views/error404.ejs -->
+<%- include('includes/_header') %>
+
+    <main id="error-page" class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8 text-center">
+                <h1 class="display-1 text-danger">404</h1>
+                <h2 class="mb-4">Oops! Page Not Found</h2>
+                <p class="lead mb-4">
+                    <%= error || 'The page you are looking for might have been removed or is temporarily unavailable.'
+                        %>
+                </p>
+
+                <div class="mb-4">
+                    <a href="/" class="btn btn-primary btn-lg me-2">
+                        <i class="fas fa-home"></i> Go Home
+                    </a>
+                    <button onclick="history.back()" class="btn btn-outline-secondary btn-lg">
+                        <i class="fas fa-arrow-left"></i> Go Back
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <%- include('includes/_footer') %>
